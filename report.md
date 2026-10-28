@@ -53,12 +53,13 @@ Firstly the files created at TPM-A are pulled to TPM-B, these are message.dat, s
 The original message is the verified by checking the integrity through the public key, signature and message.
 
 ## PCR-bound key mechanism
+A PCR-bound key is a TPM-protected key that can only be used if the system booted in the expected way. During boot, each stage is measured into the TPM's PCRs, which record the boot chain. The key's authorization policy requires these PCRs to match specific expected values, so the key is only usable on an untampered system.
 
 ## Tampered Key Rejection
 Evidence that the tampered key is rejected can be found in the evidence folder /evidence/task2_RSA/tpm_b.png.
 We added to the script that TPM-B should also attempt to verify a tampered message, this message can be found in /scripts/task2_RSA/message_tampered.dat. 
 
-The same goes for the ECC implemantation, it is exactly the same setup.
+The same goes for the ECC implementation, it is exactly the same setup.
 
 
 ## What Can TPM-B Not Conclude?
