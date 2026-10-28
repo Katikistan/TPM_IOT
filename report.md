@@ -62,38 +62,57 @@ tpm2_verifysignature: Used for verifying message
 The two devices are independent. The only things that are sent from TPM-A to TPM-B are the message, the signature, and the public key.
 
 ## RSA Signing and Verification Workflow
-Signing:
-Firstly the parent object is created. Then the child object/ RSA key pair is created - Both are created with RSA encryption.
+### Signing (TPM-A)
+First the parent object is created with `tpm2_createprimary`. Then the child object, an RSA key pair is created with `tpm2_create`. Both are created with RSA encryption.
 
-Next step is to load primary context, rsa public and private keys and export them into rsa.ctx file. The message file is then created.
+Next step is to load primary context using `tpm2_load`. The TPM uses the RSA public and private keys to write the key context to `rsa.ctx`. The message file `message.dat` is then created.
 
-Then the message is signed using the loaded TPM context.
-________ 
-Verification:
-Firstly the files created at TPM-A are pulled to TPM-B, these are message.dat, sig.rssa, public.pem; So the message, the signature and the public key. 
+Finally the message is signed inside the TPM with `tpm2_sign` using `rsa.ctx`, with SHA-256 and the `rsassa` scheme. The signature is written to `sig.rssa`. The public key is exported to `public.pem` with `tpm2_readpublic`. The private key never leaves TPM-A.
+
+We can the that the key and signature files are correctly created:
+![|500](evidence/task_2/task2_RSA/tpm_a_bash_script.png)
+![|500](evidence/task_2/task2_RSA/tpm_a_ls.png)
+
+### Verification (TPM-B)
+First the files created on TPM-A are pulled to TPM-B using scp: `message.dat` (the message), `sig.rssa` (the signature) and `public.pem` (the public key).
 
 The original message is the verified by checking the integrity through the public key, signature and message.
+
+The public key is then loaded into TPM-B with `tpm2_loadexternal`. This loads only the public part as an RSA key and produces a key context `pub.ctx`. The signature is checked with `tpm2_verifysignature`, which takes the loaded public key, the message and the signature. The TPM hashes the message with SHA-256 and checks the signature against the public key. If verification is successful it returns exit code 0.
+
+Looking at the pictures we can see we are able to verify our orignal message:
+![|500](evidence/task_2/task2_RSA/tpm_b.png)
 
 
 ## ECC Signing and Verification Workflow
-Signing:
-Firstly the parent object is created. Then the child object/ ECC key pair is created - Both are created with ECC encryption.
+### Signing (TPM-A)
+First the parent object is created with `tpm2_createprimary`. Then the child object, an ECC key pair is created with `tpm2_create`. Both are ECC keys.
 
-Next step is to load primary context, rsa public and private keys and export them into rsa.ctx file. The message file is then created.
+Next step is to load the primary context using `tpm2_load`. The TPM uses the ECC public and private keys to write the key context to `ecc.ctx`. The message file `message.dat` is then created.
 
-Then the message is signed using the loaded TPM context.
-________ 
-Verification:
-Firstly the files created at TPM-A are pulled to TPM-B, these are message.dat, sig.rssa, public.pem; So the message, the signature and the public key. 
+Finally the message is signed inside the TPM with `tpm2_sign` using `ecc.ctx`, with SHA-256 and the `ecdsa` scheme. The signature is written to `sig.plain`. The public key is exported to a PEM file with `tpm2_readpublic`. The private key never leaves TPM-A.
 
-The original message is the verified by checking the integrity through the public key, signature and message.
+We can the that the key and signature files are correctly created:
+![|500](evidence/task_2/task2_ECC/tpm_a.png)
+
+### Verification (TPM-B)
+First the files created on TPM-A are pulled to TPM-B using scp: `message.dat` (the message), `sig.plain` (the signature) and `public.pem` (the public key).
+
+The public key is then loaded into TPM-B with `tpm2_loadexternal`, this time as an ECC key, producing `pub.ctx`. The signature is checked with `tpm2_verifysignature` using the `ecdsa` scheme. The TPM hashes the message with SHA-256 and checks the signature against the public key. If verification is successful it returns exit code 0.
+
+Looking at the pictures we can see we are able to verify our orignal message:
+![|500](evidence/task_2/task2_ECC/tpm_b.png)
 
 ## PCR-bound key mechanism
 A PCR-bound key is a TPM-protected key that can only be used if the system booted in the expected way. During boot, each stage is measured into the TPM's PCRs, which record the boot chain. The key's authorization policy requires these PCRs to match specific expected values, so the key is only usable on an untampered system.
 
 ## Tampered Key Rejection
-Evidence that the tampered key is rejected can be found in the evidence folder /evidence/task2_RSA/tpm_b.png.
-We added to the script that TPM-B should also attempt to verify a tampered message, this message can be found in /scripts/task2_RSA/message_tampered.dat. 
+Evidence that the tampered messaged is rejected can be found in the evidence folder (`/evidence/task2_RSA/tpm_b.png` and `/evidence/task2_ECC/tpm_b.png`):
+![|500](evidence/task_2/task2_RSA/tpm_b.png)
+![|500](evidence/task_2/task2_ECC/tpm_b.png)
+
+We added to the script that TPM-B should also attempt to verify a tampered message, a message where we appended 
+"tampered" to it, this message can be found in `/scripts/task2_RSA/message_tampered.dat`. 
 
 The same goes for the ECC implemantation, it is exactly the same setup.
 
