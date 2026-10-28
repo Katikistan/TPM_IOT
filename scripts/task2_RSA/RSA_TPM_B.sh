@@ -8,9 +8,13 @@ PI_DIR="~/assign2/test/rsa"
 # Pull the files from the Pi
 scp "${PI_USER}@${PI_HOST}:${PI_DIR}/"{message.dat,sig.rssa,public.pem} .
 
+echo "################ Loading public key into TPM-B ################"
+tpm2_loadexternal -C o -G rsa -u public.pem -c pub.ctx
+
 echo "################ Verifying original message ################"
 echo
-openssl dgst -sha256 -verify public.pem -signature sig.rssa message.dat
+tpm2_verifysignature -c pub.ctx -g sha256 -m message.dat -s sig.rssa -f rsassa
+echo "exit code: $?"
 echo
 
 # We tamper with a copy so the original stays intact
@@ -19,4 +23,5 @@ printf '%s' 'tamper' >> message_tampered.dat
 
 echo "################ Verifying tampered message (should fail) ################"
 echo
-openssl dgst -sha256 -verify public.pem -signature sig.rssa message_tampered.dat
+tpm2_verifysignature -c pub.ctx -g sha256 -m message_tampered.dat -s sig.rssa -f rsassa
+echo "exit code: $?"
