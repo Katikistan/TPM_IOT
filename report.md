@@ -6,6 +6,19 @@ TPM-A is hosted on our Raspberry PI.
 TPM-B is hosted on one of our laptops.
 
 
+TPM-A is hosted on our Raspberry PI.
+TPM-B is hosted on one of our laptops.
+
+
+**Connecting the tpm using the pinout:**
+Looking at the diagram found at https://pinout.xyz/pinout/letstrust_tpmt we orientate the Pi with the GPIO on the right and the HDMI ports on the left. On the TPM we can see the the 3v3 power, we use place that on pin 17 on the pi, thereby aligning all the pins and installing the tpm according to the pinout diagram. 
+
+
+Afterwards we manually enable the driver inside the config.txt located in
+/boot/firmware/config.txt and below the [all] section we add:
+```
+dtoverlay=tpm-slb9670
+```
 
 ## TPM-A and TPM-B Architecture
 
