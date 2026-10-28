@@ -91,3 +91,16 @@ bash ECC_TPM_B.sh
 Expected output is the same: `Verified OK` for the original message and `Verification failure` for the tampered one. 
 
 ## 6. Run the PCR-bound signing experiment
+
+On TPM-A (Pi):
+
+```bash
+bash PCR_TPM_A.sh
+```
+
+On TPM-B (PC):
+
+```bash
+bash PCR_TPM_B.sh
+```
+Expected output is: `Verified OK` for the signature produced under the valid PCR state. 
