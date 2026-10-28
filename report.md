@@ -61,7 +61,7 @@ We added to the script that TPM-B should also attempt to verify a tampered messa
 
 The same goes for the ECC implementation, it is exactly the same setup.
 
-
 ## What Can TPM-B Not Conclude?
+TPM-B can't conclude wheter any of the context, signature or keys were genereated from another TPM. It can only verify that the message hasn't been tampered with using the signature and public key it got from TPM-A. Basically TPM-B can conclude whether a message has been tampered with. It cannot conclude on whether the source (TPM-A) is actually a TPM.
 
 ## Limitation of Experiment
