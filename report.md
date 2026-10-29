@@ -117,6 +117,17 @@ We added to the script that TPM-B should also attempt to verify a tampered messa
 The same goes for the ECC implemantation, it is exactly the same setup.
 
 ## What Can TPM-B Not Conclude?
-TPM-B can't conclude wheter any of the context, signature or keys were genereated from another TPM. It can only verify that the message hasn't been tampered with using the signature and public key it got from TPM-A. Basically TPM-B can conclude whether a message has been tampered with. It cannot conclude on whether the source (TPM-A) is actually a TPM.
+TPM-B can't conclude wheter any of the context, signature or keys were genereated from another TPM. It can only verify that the message hasn't been tampered with using the signature and public key it got from TPM-A. Basically TPM-B can conclude whether a message has been tampered with. It cannot conclude on whether the source (TPM-A) is actually a TPM. A signature made by an ordinary software key would verify in exactly the same way. 
+
+TPM-B can also not conclude that the public key belongs to TPM-A. The public key was pulled with scp, so trust is on the SSH connection and on us. If the files were replaced on the way, with another key pair and a matching signature, TPM-B would still be successful in verification.
+
+
+TPM-B cannot conclude that the message is the right message. TPM-B only knows that the message matches the signature. It does not know who wrote the message or whether it is the message it was supposed to receive.
+
 
 ## Limitation of Experiment
+The public key is copied over SSH and trusted without a certificate or any check on authenticiy.
+
+We use the default empty password and no policy, so access to the pi (TPM-A) is enough to sign.
+
+We only tested one kind of tampering, appending text to the message. We did not test modifying the signature or swapping the public key.
